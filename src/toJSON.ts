@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { altX, commentX, lineAttrX } from './regex';
 import { isEmpty } from './isEmpty';
 
@@ -59,6 +60,7 @@ export const toJSON = function (
   }
 
   while ((match = altX.exec(cssString)) != null) {
+    // console.log("match", match);
     if (!isEmpty(match[capComment]) && args.comments) {
       // Comment
       node[count++] = match[capComment].trim();
@@ -77,11 +79,23 @@ export const toJSON = function (
         for (const i in bits) {
           const sel = bits[i].trim();
           if (sel in node.children) {
-            for (const att in newNode.attributes) {
-              node.children[sel].attributes[att] = newNode.attributes[att];
+            if (sel.startsWith('@media')){
+              for (const child in newNode.children) {
+                if (child in node.children[sel].children ) {
+                  for (const att in newNode.children[child].attributes) {
+                    node.children[sel].children[child].attributes[att] = newNode.children[child].attributes[att];
+                  }
+                } else {
+                  node.children[sel].children[child] = newNode.children[child]
+                }
+              }              
+            } else {
+              for (const att in newNode.attributes) {
+                node.children[sel].attributes[att] = newNode.attributes[att];
+              }
             }
           } else {
-            node.children[sel] = newNode;
+            node.children[sel] = newNode; // here top level children are added
           }
         }
       }
